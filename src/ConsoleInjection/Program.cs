@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
+using Microsoft.Extensions.Logging;
 
 namespace ConsoleInjection
 {
@@ -7,9 +8,28 @@ namespace ConsoleInjection
     {
         static void Main(string[] args)
         {
-            var serviceProvider = new ServiceCollection();
+            var provider = BuildServiceProvider();
+            var concrete = GetService<IInjectable>(provider);
+            concrete.Execute();
+        }
 
-            Console.WriteLine("Hello World!");
+        static IServiceProvider BuildServiceProvider()
+        {
+            var provider = new ServiceCollection()
+                .AddSingleton<IInjectable, Concrete>()
+                .AddLogging()
+                .BuildServiceProvider();
+            
+            provider
+                .GetService<ILoggerFactory>()
+                .AddConsole(LogLevel.Debug);
+
+            return provider;
+        }
+
+        static T GetService<T>(IServiceProvider provider)
+        {
+            return provider.GetService<T>();
         }
     }
 }
